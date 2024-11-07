@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Config Page</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
+    />
+    <link rel="stylesheet" href="main.css" />
+  </head>
+  <body>
+    <div class="config-container">
+      <h2>Configuration</h2>
+      <form id="config-form">
+        <label for="test-input">Test:</label>
+        <input type="text" id="test-input" name="test" />
+        <button type="button" id="save-button">Save</button>
+      </form>
+    </div>
+
+    <script>
+      // Load configuration from config.json if it exists, otherwise load defaults.json
+      document.addEventListener('DOMContentLoaded', function() {
+        fetch('config.json')
+          .then(response => {
+            if (response.ok) {
+              return response.json();
+            } else if (response.status === 404) {
+              // config.json not found, load defaults.json
+              return fetch('defaults.json')
+                .then(defaultResponse => {
+                  if (defaultResponse.ok) {
+                    return defaultResponse.json();
+                  } else {
+                    throw new Error('Failed to load defaults.json');
+                  }
+                });
+            } else {
+              throw new Error('Failed to load config.json');
+            }
+          })
+          .then(config => {
+            document.getElementById('test-input').value = config.test || '';
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+      });
+
+      // Save configuration to config.json
+      document.getElementById('save-button').addEventListener('click', function() {
+        const testValue = document.getElementById('test-input').value;
+        const configData = {
+          test: testValue
+        };
+
+        // Save config data to config.json (note: requires server-side handling)
+        fetch('save_config', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(configData)
+        }).then(response => {
+          if (response.ok) {
+            alert('Configuration saved successfully!');
+          } else {
+            alert('Failed to save configuration.');
+          }
+        }).catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while saving the configuration.');
+        });
+      });
+    </script>
+  </body>
+</html>
