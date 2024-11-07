@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Deepthought</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
+    />
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background-color: #002b36; /* Solarized base03 */
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #839496; /* Solarized base0 */
+      }
+
+      .floating-menu {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background-color: #073642; /* Solarized base02 */
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        cursor: grab;
+        z-index: 1000;
+      }
+
+      .toolbar-title {
+        font-size: 1.5em;
+        font-weight: bold;
+        margin-right: 20px;
+      }
+
+      .move-icon {
+        width: 16px;
+        height: 16px;
+        margin-right: 10px;
+        background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23839496%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M4 6h16M4 12h16M4 18h16%22/%3E%3C/svg%3E');
+        background-size: contain;
+        background-repeat: no-repeat;
+      }
+
+      .dropdown {
+        position: relative;
+        display: inline-block;
+      }
+
+      .dropdown-button {
+        background-color: #268bd2; /* Solarized blue */
+        color: #002b36; /* Solarized base03 */
+        padding: 10px;
+        font-weight: bold;
+        border: 0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .dropdown-button:hover {
+        background-color: #2aa198; /* Solarized cyan */
+      }
+
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #073642; /* Solarized base02 */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        padding: 10px;
+        min-width: 160px;
+        z-index: 1;
+      }
+
+      .dropdown:hover .dropdown-content {
+        display: block;
+      }
+
+      .dropdown-content a {
+        color: #839496; /* Solarized base0 */
+        text-decoration: none;
+        display: block;
+        padding: 10px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+
+      .dropdown-content a:hover {
+        background-color: #2aa198; /* Solarized cyan */
+      }
+
+      .iframe-container {
+        flex-grow: 1;
+        margin-top: 80px;
+      }
+
+      iframe {
+        width: 100%;
+        height: calc(100vh - 80px);
+        border: none;
+        border-radius: 0;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .checkbox-container {
+        margin-left: 20px;
+        font-size: 0.8em;
+        display: flex;
+        align-items: center;
+      }
+
+      .checkbox-container input {
+        margin-right: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="floating-menu" id="floating-menu">
+      <div class="move-icon"></div>
+      <div class="toolbar-title">Deepthought</div>
+      <div class="dropdown">
+        <button class="dropdown-button">Apps</button>
+        <div class="dropdown-content">
+          <a href="#" onclick="handleClick('http://127.0.0.1:8000')">Sillytavern</a>
+          <a href="#" onclick="handleClick('http://127.0.0.1:7860')">Text Gen</a>
+          <a href="#" onclick="handleClick('http://127.0.0.1:7861')">Stable Diffusion</a>
+          <a href="#" onclick="handleClick('http://127.0.0.1:8188')">ComfyUI</a>
+        </div>
+      </div>
+      <div class="checkbox-container">
+        <input type="checkbox" id="new-window-checkbox" />
+        <label for="new-window-checkbox">Open in new window</label>
+      </div>
+    </div>
+    <div class="iframe-container">
+      <iframe id="content-frame" style="background-color: #002b36; color: #839496;"></iframe>
+    </div>
+
+    <script>
+      function handleClick(url) {
+        const openInNewWindow = document.getElementById('new-window-checkbox').checked;
+        if (openInNewWindow || window.innerWidth <= 768) {
+          // Open in new window if checkbox is checked or on mobile view
+          window.open(url, '_blank');
+        } else {
+          // Desktop view: load in iframe
+          document.getElementById('content-frame').src = url;
+        }
+      }
+
+      // Drag and move functionality for the floating menu
+      const floatingMenu = document.getElementById('floating-menu');
+      let isDragging = false;
+      let offsetX, offsetY;
+
+      floatingMenu.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offsetX = e.clientX - floatingMenu.getBoundingClientRect().left;
+        offsetY = e.clientY - floatingMenu.getBoundingClientRect().top;
+        floatingMenu.style.cursor = 'grabbing';
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+          floatingMenu.style.left = `${e.clientX - offsetX}px`;
+          floatingMenu.style.top = `${e.clientY - offsetY}px`;
+        }
+      });
+
+      document.addEventListener('mouseup', () => {
+        isDragging = false;
+        floatingMenu.style.cursor = 'grab';
+      });
+    </script>
+  </body>
+</html>
